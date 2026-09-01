@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TazaBazar - Online Grocery Superstore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background-color: #f4f6f8; color: #333; }
+
+        .top-banner { background: #1b5e20; color: white; text-align: center; padding: 6px; font-size: 12px; font-weight: bold; }
+        
+        header { background: #2e7d32; padding: 12px 30px; display: flex; align-items: center; justify-content: space-between; color: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .logo { font-size: 24px; font-weight: bold; color: #fff; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        .search-bar { display: flex; width: 35%; }
+        .search-bar input { width: 100%; padding: 10px 15px; border: none; border-radius: 4px 0 0 4px; outline: none; font-size: 14px; }
+        .search-bar button { background: #4caf50; border: none; padding: 10px 18px; color: white; border-radius: 0 4px 4px 0; cursor: pointer; font-size: 14px; }
+
+        .header-actions { display: flex; gap: 10px; }
+        .btn-header { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-header:hover { background: rgba(255,255,255,0.3); }
+
+        /* Navigation Menu Bar */
+        .nav-menu-bar { background: #ffffff; border-bottom: 1px solid #e0e0e0; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-links { display: flex; list-style: none; }
+        .nav-links li a { display: block; padding: 14px 18px; color: #333; text-decoration: none; font-weight: bold; font-size: 14px; transition: 0.2s; cursor: pointer; }
+        .nav-links li a:hover, .nav-links li a.active { color: #2e7d32; background: #e8f5e9; }
+        
+        .category-dropdown-btn { background: #4caf50; color: white; padding: 14px 20px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+
+        .main-layout { display: flex; max-width: 1250px; margin: 20px auto; padding: 0 15px; gap: 20px; }
+        
+        /* Category Sidebar */
+        .sidebar-categories { width: 240px; background: white; border-radius: 8px; border: 1px solid #e0e0e0; height: fit-content; padding: 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .sidebar-title { font-size: 15px; font-weight: bold; padding: 10px 15px; border-bottom: 1px solid #eee; color: #1b5e20; }
+        .cat-list { list-style: none; }
+        .cat-list li a { display: flex; align-items: center; gap: 10px; padding: 10px 15px; color: #555; text-decoration: none; font-size: 14px; border-bottom: 1px dashed #f0f0f0; transition: 0.2s; cursor: pointer; }
+        .cat-list li a:hover, .cat-list li a.active { background: #e8f5e9; color: #2e7d32; padding-left: 18px; }
+
+        .content-area { flex: 1; }
+
+        /* Product Grid */
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 15px; }
+        .product-card { background: white; border-radius: 6px; padding: 15px; border: 1px solid #e0e0e0; cursor: pointer; transition: 0.2s; position: relative; }
+        .product-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #2e7d32; }
+        .badge { position: absolute; top: 10px; right: 10px; background: #d32f2f; color: white; font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 3px; }
+        .img-box { height: 150px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .product-title { font-size: 14px; font-weight: bold; margin-bottom: 8px; color: #222; }
+        .price-box { margin-bottom: 12px; }
+        .current-price { font-size: 17px; font-weight: bold; color: #2e7d32; }
+        .old-price { font-size: 12px; text-decoration: line-through; color: #888; margin-left: 6px; }
+
+        /* Detail View & Admin Panels */
+        .product-detail-view { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); grid-template-columns: 100px 1fr 1.2fr; gap: 25px; }
+        .main-img-box { width: 100%; border: 1px solid #eee; border-radius: 6px; padding: 15px; display: flex; align-items: center; justify-content: center; height: 350px; }
+        .main-img-box img { max-height: 100%; max-width: 100%; }
+        
+        .detail-info h1 { font-size: 22px; margin-bottom: 10px; color: #222; }
+        .detail-price { font-size: 26px; font-weight: bold; color: #2e7d32; margin-bottom: 20px; }
+        .qty-picker { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; }
+        .qty-btn { width: 32px; height: 32px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 16px; border-radius: 4px; font-weight: bold; }
+        .qty-val { font-size: 16px; font-weight: bold; width: 30px; text-align: center; }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-add-cart { background: #e8f5e9; color: #2e7d32; border: 1px solid #2e7d32; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-buy-now { background: #1b5e20; color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; flex: 1; }
+
+        /* Admin Styles */
+        #admin-view { display: none; background: #f9f9f9; padding: 25px; border-radius: 8px; }
+        .dashboard-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .dash-card { background: white; padding: 20px; border-radius: 8px; border-left: 5px solid #2e7d32; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .admin-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .admin-nav-btn { padding: 10px 20px; background: white; border: 1px solid #ddd; border-bottom: none; cursor: pointer; font-weight: bold; border-radius: 4px 4px 0 0; }
+        .admin-nav-btn.active { background: #1b5e20; color: white; border-color: #1b5e20; }
+        .admin-section { background: white; padding: 20px; border-radius: 8px; display: none; }
+        .admin-section.active { display: block; }
+        
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
+        .admin-table th { background-color: #f2f2f2; }
+        .btn-edit { background: #f57c00; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        /* Modal Popup System */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 90%; max-width: 480px; padding: 25px; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 20px; cursor: pointer; }
+        .form-control { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+
+        .payment-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .pay-option { border: 1px solid #ccc; padding: 10px; border-radius: 6px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+        .pay-option.selected { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; }
+
+        .auth-tabs { display: flex; border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .auth-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #666; }
+        .auth-tab.active { border-bottom: 3px solid #2e7d32; color: #2e7d32; }
+
+        .back-btn { display: inline-block; margin-bottom: 15px; color: #2e7d32; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="top-banner">🚚 Express 1-Hour Grocery Delivery in Dhaka City!</div>
+
+    <header>
+        <a class="logo" onclick="filterByCategory('all')"><i class="fa fa-shopping-basket"></i> TazaBazar</a>
+        
+        <div class="search-bar">
+            <input type="text" id="search-input" onkeyup="searchProducts()" placeholder="Search Fresh Fish, Meat, Rice, Milk...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn-header" onclick="openModal('customer-auth-modal')"><i class="fa fa-user"></i> Login / Register</button>
+            <button class="btn-header" onclick="openModal('admin-login-modal')"><i class="fa fa-user-shield"></i> Admin Panel</button>
+            <button class="btn-header" style="background:#4caf50;"><i class="fa fa-shopping-cart"></i> Cart (<span id="cart-count">0</span>)</button>
+        </div>
+    </header>
+
+    <!-- NAVIGATION MENU BAR -->
+    <div class="nav-menu-bar">
+        <button class="category-dropdown-btn"><i class="fa fa-bars"></i> ALL CATEGORIES</button>
+        <ul class="nav-links">
+            <li><a class="nav-link active" onclick="filterByCategory('all', this)">All Products</a></li>
+            <li><a class="nav-link" onclick="filterByCategory('Fresh Veggies', this)">Fresh Veggies</a></li>
+            <li><a class="nav-link" onclick="filterByCategory('Fish & Meat', this)">Fish & Meat</a></li>
+            <li><a class="nav-link" onclick="filterByCategory('Milk & Dairy', this)">Dairy & Eggs</a></li>
+            <li><a class="nav-link" onclick="filterByCategory('Daily Offers', this)">Daily Offers 🔥</a></li>
+        </ul>
+    </div>
+
+    <!-- MAIN GROCERY LAYOUT WITH SIDEBAR -->
+    <div class="main-layout">
+        
+        <!-- SIDEBAR CATEGORIES -->
+        <div class="sidebar-categories">
+            <div class="sidebar-title"><i class="fa fa-list"></i> Select Category</div>
+            <ul class="cat-list">
+                <li><a class="side-link active" onclick="filterByCategory('all', this)"><i class="fa fa-th-large"></i> All Grocery Items</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Fresh Veggies', this)"><i class="fa fa-carrot"></i> Fresh Vegetables</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Fresh Fruits', this)"><i class="fa fa-apple-alt"></i> Fresh Fruits</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Fish & Meat', this)"><i class="fa fa-fish"></i> Fish & Meat</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Milk & Dairy', this)"><i class="fa fa-egg"></i> Milk & Dairy</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Rice & Spices', this)"><i class="fa fa-box"></i> Rice, Oil & Spices</a></li>
+                <li><a class="side-link" onclick="filterByCategory('Snacks & Drinks', this)"><i class="fa fa-cookie"></i> Snacks & Drinks</a></li>
+            </ul>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="content-area">
+            
+            <!-- HOME PAGE PRODUCT LIST VIEW -->
+            <div id="home-view">
+                <h3 style="margin-bottom: 15px; color: #1b5e20;" id="section-title">All Products</h3>
+                <div class="product-grid" id="main-product-grid"></div>
+            </div>
+
+            <!-- PRODUCT DETAIL PAGE VIEW -->
+            <div id="detail-view" class="product-detail-view">
+                <div class="gallery-thumbs">
+                    <img src="https://via.placeholder.com/100?text=Grocery" style="width:80px; border:1px solid #ddd; padding:4px;">
+                </div>
+                
+                <div>
+                    <div class="back-btn" onclick="showHome()"><i class="fa fa-arrow-left"></i> Back to Grocery List</div>
+                    <div class="main-img-box">
+                        <img id="detail-img" src="" alt="Product Image">
+                    </div>
+                </div>
+
+                <div class="detail-info">
+                    <h1 id="detail-title">Product Name</h1>
+                    <div class="detail-price" id="detail-price">৳0</div>
+                    
+                    <p style="margin-bottom: 10px; font-weight: bold;">Quantity (KG / Unit):</p>
+                    <div class="qty-picker">
+                        <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                        <span class="qty-val" id="qty-val">1</span>
+                        <button class="qty-btn" onclick="updateQty(1)">+</button>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn-add-cart" onclick="addToCart()">ADD TO CART</button>
+                        <button class="btn-buy-now" onclick="openCheckout()">BUY NOW</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPLETE ADMIN DASHBOARD VIEW -->
+            <div id="admin-view">
+                <div class="back-btn" onclick="showHome()"><i class="fa fa-arrow-left"></i> Back to Store Front</div>
+                <h2 style="color: #1b5e20; margin-bottom: 20px;">TazaBazar Admin Panel</h2>
+
+                <div class="dashboard-cards">
+                    <div class="dash-card">
+                        <p>Total Revenue</p>
+                        <h2 id="dash-total-sales">৳0</h2>
+                    </div>
+                    <div class="dash-card" style="border-left-color: #0288d1;">
+                        <p>Total Orders</p>
+                        <h2 id="dash-total-orders">0</h2>
+                    </div>
+                    <div class="dash-card" style="border-left-color: #f57c00;">
+                        <p>Active Grocery Items</p>
+                        <h2 id="dash-total-products">0</h2>
+                    </div>
+                </div>
+
+                <div class="admin-nav">
+                    <div class="admin-nav-btn active" onclick="switchAdminTab('manage-products')">All Products</div>
+                    <div class="admin-nav-btn" onclick="switchAdminTab('upload-product')">Upload Product</div>
+                    <div class="admin-nav-btn" onclick="switchAdminTab('orders-list')">Orders Dashboard</div>
+                </div>
+                
+                <div id="sec-manage-products" class="admin-section active">
+                    <h3>Manage Grocery Items</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-list"></tbody>
+                    </table>
+                </div>
+
+                <!-- UPLOAD FORM WITH CATEGORY SELECTOR -->
+                <div id="sec-upload-product" class="admin-section">
+                    <h3>Upload New Grocery Product</h3>
+                    <form id="uploadForm" onsubmit="handleItemUpload(event)">
+                        <label>Product Title:</label>
+                        <input type="text" id="p-title" class="form-control" required placeholder="e.g. Miniket Rice 5KG">
+
+                        <!-- NEW CATEGORY SELECTION FIELD -->
+                        <label style="font-weight: bold; color: #1b5e20;">Select Category (Kothai Show Korbe):</label>
+                        <select id="p-category" class="form-control" required style="border: 2px solid #2e7d32; font-weight: bold;">
+                            <option value="Fresh Veggies">Fresh Veggies (শাক-সবজি)</option>
+                            <option value="Fish & Meat">Fish & Meat (মাছ ও মাংস)</option>
+                            <option value="Milk & Dairy">Milk & Dairy (দুধ ও ডিম)</option>
+                            <option value="Rice & Spices">Rice & Spices (চাল, তেল ও মশলা)</option>
+                            <option value="Fresh Fruits">Fresh Fruits (ফলমূল)</option>
+                            <option value="Snacks & Drinks">Snacks & Drinks (স্ন্যাক্স ও পানীয়)</option>
+                            <option value="Daily Offers">Daily Offers 🔥 (অফার)</option>
+                        </select>
+
+                        <label>Selling Price (TK):</label>
+                        <input type="number" id="p-price" class="form-control" required placeholder="350">
+
+                        <label>Original Price (TK):</label>
+                        <input type="number" id="p-old-price" class="form-control" placeholder="380">
+
+                        <label>Discount Tag:</label>
+                        <input type="text" id="p-badge" class="form-control" placeholder="-8%">
+
+                        <label>Product Image:</label>
+                        <input type="file" id="p-image" class="form-control" accept="image/*" required>
+
+                        <button type="submit" class="btn-buy-now">Publish Grocery Item</button>
+                    </form>
+                </div>
+
+                <div id="sec-orders-list" class="admin-section">
+                    <h3>Customer Orders Management</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Address & Phone</th>
+                                <th>Item & Qty</th>
+                                <th>Total</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-list"></tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PRODUCT EDIT MODAL WITH CATEGORY OPTION -->
+    <div class="modal" id="edit-product-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('edit-product-modal')">&times;</span>
+            <h3>Edit Grocery Item</h3>
+            <form id="editForm" onsubmit="saveProductEdit(event)">
+                <input type="hidden" id="edit-p-id">
+                <label>Title:</label>
+                <input type="text" id="edit-p-title" class="form-control" required>
+                
+                <label>Category:</label>
+                <select id="edit-p-category" class="form-control" required>
+                    <option value="Fresh Veggies">Fresh Veggies</option>
+                    <option value="Fish & Meat">Fish & Meat</option>
+                    <option value="Milk & Dairy">Milk & Dairy</option>
+                    <option value="Rice & Spices">Rice & Spices</option>
+                    <option value="Fresh Fruits">Fresh Fruits</option>
+                    <option value="Snacks & Drinks">Snacks & Drinks</option>
+                    <option value="Daily Offers">Daily Offers 🔥</option>
+                </select>
+
+                <label>Price (TK):</label>
+                <input type="number" id="edit-p-price" class="form-control" required>
+                <label>Old Price (TK):</label>
+                <input type="number" id="edit-p-old-price" class="form-control">
+                <label>Discount Badge:</label>
+                <input type="text" id="edit-p-badge" class="form-control">
+                <label>Update Image:</label>
+                <input type="file" id="edit-p-image" class="form-control" accept="image/*">
+                <button type="submit" class="btn-buy-now">Save Update</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOMER AUTH MODAL -->
+    <div class="modal" id="customer-auth-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('customer-auth-modal')">&times;</span>
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">Login</div>
+                <div class="auth-tab" id="tab-reg-btn" onclick="switchAuthTab('register')">Register</div>
+            </div>
+
+            <div id="login-form-box">
+                <label>Mobile Number / Email:</label>
+                <input type="text" class="form-control" placeholder="017XXXXXXXX">
+                <label>Password:</label>
+                <input type="password" class="form-control">
+                <button class="btn-buy-now" style="width:100%;" onclick="alert('Login Successful!'); closeModal('customer-auth-modal');">Login</button>
+            </div>
+
+            <div id="reg-form-box" style="display: none;">
+                <label>Full Name:</label>
+                <input type="text" class="form-control">
+                <label>Mobile Number:</label>
+                <input type="tel" class="form-control">
+                <label>Password:</label>
+                <input type="password" class="form-control">
+                <button class="btn-buy-now" style="width:100%;" onclick="alert('Account Created! Now Please Login.'); switchAuthTab('login');">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal" id="admin-login-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('admin-login-modal')">&times;</span>
+            <h3 style="color:#d32f2f;">Admin Dashboard Authentication</h3>
+            <br>
+            <label>Admin Username:</label>
+            <input type="text" id="admin-user" class="form-control" placeholder="admin">
+            <label>Password:</label>
+            <input type="password" id="admin-pass" class="form-control" placeholder="Password (1234)">
+            <button class="btn-buy-now" style="width: 100%; background: #d32f2f;" onclick="loginAdmin()">Login to Admin Panel</button>
+        </div>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('checkout-modal')">&times;</span>
+            <h3>Checkout & Complete Order</h3>
+            
+            <p style="margin: 10px 0; background: #e8f5e9; padding: 10px; color: #1b5e20;">
+                Total Payable Amount: <strong id="modal-total-price">৳0</strong>
+            </p>
+
+            <form onsubmit="confirmOrder(event)">
+                <label>Full Name:</label>
+                <input type="text" id="cust-name" class="form-control" required placeholder="Apnar Naam">
+
+                <label>Mobile Number:</label>
+                <input type="tel" id="cust-phone" class="form-control" required placeholder="017XXXXXXXX">
+
+                <label>Delivery Address:</label>
+                <textarea id="cust-address" class="form-control" rows="2" required placeholder="Full Home Address"></textarea>
+
+                <label>Payment Options:</label>
+                <div class="payment-options">
+                    <div class="pay-option selected" onclick="selectPay(this, 'Cash on Delivery')">
+                        <i class="fa fa-truck"></i> Cash on Delivery
+                    </div>
+                    <div class="pay-option" onclick="selectPay(this, 'bKash')">
+                        bKash
+                    </div>
+                    <div class="pay-option" onclick="selectPay(this, 'Nagad')">
+                        Nagad
+                    </div>
+                    <div class="pay-option" onclick="selectPay(this, 'Card')">
+                        <i class="fa fa-credit-card"></i> Card
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-buy-now" style="width:100%; margin-top:10px;">Place Order Now</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentQty = 1;
+        let unitPrice = 0;
+        let selectedProductTitle = '';
+        let cartCount = 0;
+        let selectedPaymentMethod = 'Cash on Delivery';
+        let activeCategory = 'all';
+
+        const defaultProducts = [
+            { id: 1, title: 'Fresh Deshi Rui Fish Cleaned - 1 KG', category: 'Fish & Meat', price: 420, oldPrice: 480, badge: '-12%', image: 'https://via.placeholder.com/200?text=Rui+Fish' },
+            { id: 2, title: 'Beef Meat Premium Bone-in - 1 KG', category: 'Fish & Meat', price: 750, oldPrice: 800, badge: '-6%', image: 'https://via.placeholder.com/200?text=Fresh+Beef' },
+            { id: 3, title: 'Fresh Farm Egg Layer - 12 Pcs', category: 'Milk & Dairy', price: 145, oldPrice: 160, badge: '-9%', image: 'https://via.placeholder.com/200?text=Farm+Eggs' }
+        ];
+
+        function getSavedProducts() {
+            const saved = localStorage.getItem('tazabazar_products');
+            return saved ? JSON.parse(saved) : defaultProducts;
+        }
+
+        function getSavedOrders() {
+            const saved = localStorage.getItem('tazabazar_orders');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        let products = getSavedProducts();
+        let orders = getSavedOrders();
+
+        function renderProducts(filteredCategory = 'all') {
+            const grid = document.getElementById('main-product-grid');
+            const adminList = document.getElementById('admin-product-list');
+
+            grid.innerHTML = '';
+            adminList.innerHTML = '';
+
+            const listToRender = (filteredCategory === 'all') 
+                ? products 
+                : products.filter(p => p.category === filteredCategory);
+
+            if(listToRender.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px 0;">No products found in "${filteredCategory}" category.</p>`;
+            } else {
+                listToRender.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.onclick = () => openProduct(p.title, p.price, p.image);
+                    card.innerHTML = `
+                        ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
+                        <div class="img-box"><img src="${p.image}" alt="${p.title}"></div>
+                        <div class="product-title">${p.title}</div>
+                        <div class="price-box"><span class="current-price">৳${p.price}</span><span class="old-price">৳${p.oldPrice}</span></div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            products.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><img src="${p.image}" style="width: 40px; height: 40px; object-fit: contain;"></td>
+                    <td>${p.title}</td>
+                    <td><span style="background:#e8f5e9; color:#1b5e20; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">${p.category || 'General'}</span></td>
+                    <td>৳${p.price}</td>
+                    <td>
+                        <button class="btn-edit" onclick="openEditModal(${p.id})">Edit</button>
+                        <button class="btn-delete" onclick="deleteProduct(${p.id})">Delete</button>
+                    </td>
+                `;
+                adminList.appendChild(row);
+            });
+
+            renderOrders();
+            updateDashboardCards();
+        }
+
+        function filterByCategory(categoryName, element = null) {
+            showHome();
+            activeCategory = categoryName;
+            
+            document.querySelectorAll('.nav-link, .side-link').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+
+            document.getElementById('section-title').innerText = categoryName === 'all' ? 'All Products' : categoryName;
+            renderProducts(categoryName);
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const grid = document.getElementById('main-product-grid');
+            grid.innerHTML = '';
+
+            const matched = products.filter(p => p.title.toLowerCase().includes(query));
+
+            if(matched.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px 0;">No grocery items found!</p>`;
+            } else {
+                matched.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.onclick = () => openProduct(p.title, p.price, p.image);
+                    card.innerHTML = `
+                        ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
+                        <div class="img-box"><img src="${p.image}" alt="${p.title}"></div>
+                        <div class="product-title">${p.title}</div>
+                        <div class="price-box"><span class="current-price">৳${p.price}</span><span class="old-price">৳${p.oldPrice}</span></div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        }
+
+        function handleItemUpload(event) {
+            event.preventDefault();
+            const title = document.getElementById('p-title').value;
+            const category = document.getElementById('p-category').value;
+            const price = Number(document.getElementById('p-price').value);
+            const oldPrice = Number(document.getElementById('p-old-price').value) || price;
+            const badge = document.getElementById('p-badge').value || '';
+            const imageFile = document.getElementById('p-image').files[0];
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newProduct = {
+                        id: Date.now(),
+                        title: title,
+                        category: category,
+                        price: price,
+                        oldPrice: oldPrice,
+                        badge: badge,
+                        image: e.target.result
+                    };
+                    products.push(newProduct);
+                    localStorage.setItem('tazabazar_products', JSON.stringify(products));
+                    renderProducts(activeCategory);
+                    alert(`Grocery Item Published Successfully under Category: "${category}"`);
+                    document.getElementById('uploadForm').reset();
+                    switchAdminTab('manage-products');
+                };
+                reader.readAsDataURL(imageFile);
+            }
+        }
+
+        function renderOrders() {
+            const adminOrdersList = document.getElementById('admin-orders-list');
+            adminOrdersList.innerHTML = '';
+
+            orders.forEach(o => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${o.id}</td>
+                    <td>${o.name}</td>
+                    <td>${o.phone}<br><small>${o.address}</small></td>
+                    <td>${o.product} (x${o.qty})</td>
+                    <td>৳${o.total}</td>
+                    <td>${o.payment}</td>
+                    <td><strong>${o.status}</strong></td>
+                    <td><button class="btn-edit" onclick="toggleOrderStatus(${o.id})">Change Status</button></td>
+                `;
+                adminOrdersList.appendChild(row);
+            });
+        }
+
+        function updateDashboardCards() {
+            const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('dash-total-sales').innerText = '৳' + totalSales;
+            document.getElementById('dash-total-orders').innerText = orders.length;
+            document.getElementById('dash-total-products').innerText = products.length;
+        }
+
+        function openEditModal(id) {
+            const p = products.find(item => item.id === id);
+            if(p) {
+                document.getElementById('edit-p-id').value = p.id;
+                document.getElementById('edit-p-title').value = p.title;
+                document.getElementById('edit-p-category').value = p.category || 'Fresh Veggies';
+                document.getElementById('edit-p-price').value = p.price;
+                document.getElementById('edit-p-old-price').value = p.oldPrice;
+                document.getElementById('edit-p-badge').value = p.badge || '';
+                openModal('edit-product-modal');
+            }
+        }
+
+        function saveProductEdit(event) {
+            event.preventDefault();
+            const id = Number(document.getElementById('edit-p-id').value);
+            const p = products.find(item => item.id === id);
+
+            if(p) {
+                p.title = document.getElementById('edit-p-title').value;
+                p.category = document.getElementById('edit-p-category').value;
+                p.price = Number(document.getElementById('edit-p-price').value);
+                p.oldPrice = Number(document.getElementById('edit-p-old-price').value) || p.price;
+                p.badge = document.getElementById('edit-p-badge').value;
+
+                const imageFile = document.getElementById('edit-p-image').files[0];
+                if (imageFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        p.image = e.target.result;
+                        localStorage.setItem('tazabazar_products', JSON.stringify(products));
+                        renderProducts(activeCategory);
+                        closeModal('edit-product-modal');
+                    };
+                    reader.readAsDataURL(imageFile);
+                } else {
+                    localStorage.setItem('tazabazar_products', JSON.stringify(products));
+                    renderProducts(activeCategory);
+                    closeModal('edit-product-modal');
+                }
+            }
+        }
+
+        function deleteProduct(id) {
+            if(confirm('Delete this product permanently?')) {
+                products = products.filter(p => p.id !== id);
+                localStorage.setItem('tazabazar_products', JSON.stringify(products));
+                renderProducts(activeCategory);
+            }
+        }
+
+        function toggleOrderStatus(orderId) {
+            const o = orders.find(item => item.id === orderId);
+            if(o) {
+                o.status = (o.status === 'Pending') ? 'Completed' : 'Pending';
+                localStorage.setItem('tazabazar_orders', JSON.stringify(orders));
+                renderProducts(activeCategory);
+            }
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+
+            if(tabName === 'manage-products') {
+                document.querySelectorAll('.admin-nav-btn')[0].classList.add('active');
+                document.getElementById('sec-manage-products').classList.add('active');
+            } else if(tabName === 'upload-product') {
+                document.querySelectorAll('.admin-nav-btn')[1].classList.add('active');
+                document.getElementById('sec-upload-product').classList.add('active');
+            } else if(tabName === 'orders-list') {
+                document.querySelectorAll('.admin-nav-btn')[2].classList.add('active');
+                document.getElementById('sec-orders-list').classList.add('active');
+            }
+        }
+
+        function switchAuthTab(type) {
+            if (type === 'login') {
+                document.getElementById('login-form-box').style.display = 'block';
+                document.getElementById('reg-form-box').style.display = 'none';
+                document.getElementById('tab-login-btn').classList.add('active');
+                document.getElementById('tab-reg-btn').classList.remove('active');
+            } else {
+                document.getElementById('login-form-box').style.display = 'none';
+                document.getElementById('reg-form-box').style.display = 'block';
+                document.getElementById('tab-login-btn').classList.remove('active');
+                document.getElementById('tab-reg-btn').classList.add('active');
+            }
+        }
+
+        function showHome() {
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('detail-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'none';
+        }
+
+        function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        function openProduct(title, price, imgSrc) {
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('admin-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'grid';
+            
+            unitPrice = price;
+            selectedProductTitle = title;
+            currentQty = 1;
+
+            document.getElementById('detail-title').innerText = title;
+            document.getElementById('detail-img').src = imgSrc;
+            document.getElementById('qty-val').innerText = currentQty;
+            calculateTotal();
+        }
+
+        function updateQty(change) {
+            if (currentQty + change >= 1) {
+                currentQty += change;
+                document.getElementById('qty-val').innerText = currentQty;
+                calculateTotal();
+            }
+        }
+
+        function calculateTotal() {
+            const totalPrice = unitPrice * currentQty;
+            document.getElementById('detail-price').innerText = '৳' + totalPrice;
+            document.getElementById('modal-total-price').innerText = '৳' + totalPrice;
+        }
+
+        function addToCart() {
+            cartCount += currentQty;
+            document.getElementById('cart-count').innerText = cartCount;
+            alert(`${currentQty} Item Added to Grocery Cart!`);
+        }
+
+        function openCheckout() { openModal('checkout-modal'); }
+
+        function selectPay(element, method) {
+            document.querySelectorAll('.pay-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPaymentMethod = method;
+        }
+
+        function confirmOrder(event) {
+            event.preventDefault();
+            const totalPrice = unitPrice * currentQty;
+
+            const newOrder = {
+                id: Math.floor(1000 + Math.random() * 9000),
+                name: document.getElementById('cust-name').value,
+                phone: document.getElementById('cust-phone').value,
+                address: document.getElementById('cust-address').value,
+                product: selectedProductTitle,
+                qty: currentQty,
+                total: totalPrice,
+                payment: selectedPaymentMethod,
+                status: 'Pending'
+            };
+
+            orders.push(newOrder);
+            localStorage.setItem('tazabazar_orders', JSON.stringify(orders));
+            renderProducts(activeCategory);
+
+            alert('Thank you! Your Grocery order has been placed.');
+            closeModal('checkout-modal');
+            showHome();
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === "1234") {
+                closeModal('admin-login-modal');
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('detail-view').style.display = 'none';
+                document.getElementById('admin-view').style.display = 'block';
+            } else { alert('Wrong Password! Try 1234'); }
+        }
+
+        renderProducts('all');
+    </script>
+</body>
+</html>
